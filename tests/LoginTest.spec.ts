@@ -2,34 +2,25 @@ import { test, expect } from '@playwright/test';
 import { LoginPage } from '../PageObjects/LoginPage';
 import loginData from '../test-Data/loginData.json';
 
-test('Verify Valid Login test:', async ({ page }) => {
+test.describe('Login Tests (JSON)', () => {
 
-  const loginPage = new LoginPage(page);
+  for (const data of loginData) {
 
-  await loginPage.gotoLoginPage();
-  //await loginPage.Login('standard_user', 'secret_sauce');  --> Hardcoded values/Inputs
+    test(`Login test for ${data.username}`, async ({ page }) => {
 
-  await loginPage.Login(
-    loginData.valid_user.username,
-    loginData.valid_user.password
-  );
-  // await loginPage.verifyLoginSuccess();
+      const loginPage = new LoginPage(page);
 
-  await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
+      await loginPage.gotoLoginPage();
+      await loginPage.Login(data.username, data.password);
 
-});
+      if (data.expected === 'success') {
+        await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
+      } else {
+        await expect(loginPage.errorMessage).toBeVisible();
+      }
 
-test('Verify Invalid Login test:', async ({ page }) => {
+    });
 
-  const loginPage = new LoginPage(page);
+  }
 
-  await loginPage.gotoLoginPage();
-  //await loginPage.Login('standard_user', 'secret_sauce');  --> Hardcoded values/Inputs
-
-  await loginPage.Login(
-    loginData.Invalid_user.username,
-    loginData.Invalid_user.password
-  );
-
-  await expect(loginPage.errorMessage).toBeVisible();
 });
